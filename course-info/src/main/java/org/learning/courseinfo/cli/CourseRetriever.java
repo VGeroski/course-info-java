@@ -1,7 +1,11 @@
 package org.learning.courseinfo.cli;
 
+import org.learning.courseinfo.cli.service.CourseRetrievalService;
+import org.learning.courseinfo.cli.service.PluralsightCourse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class CourseRetriever {
 
@@ -25,6 +29,13 @@ public class CourseRetriever {
 
     private static void retrieveCourses(String authorId) {
         LOG.info("Retrieving courses for author '{}'", authorId);
+
+        CourseRetrievalService courseRetrievalService = new CourseRetrievalService();
+        List<PluralsightCourse> coursesToStore = courseRetrievalService.getCourseFor(authorId)
+                .stream()                              // convert list to stream, and then apply filtering
+                .filter(course -> !course.isRetired()) // filter to present only courses that are not retired
+                .toList();                             // return to List after filtering
+        LOG.info("Retrieved the following {} courses {}", coursesToStore.size(), coursesToStore);
     }
 
 }
