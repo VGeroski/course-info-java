@@ -1,9 +1,6 @@
 package org.learning.courseinfo.server;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.learning.courseinfo.domain.Course;
 import org.learning.courseinfo.repository.CourseRepository;
@@ -13,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Path("/courses")
 public class CourseResource {
@@ -26,17 +24,24 @@ public class CourseResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Course> getCourses() {
+    public Stream<Course> getCourses() {
         try {
             return courseRepository
                     .getAllCourses()
                     .stream()
-                    .sorted(Comparator.comparing(Course::id))
-                    .toList();
+                    .sorted(Comparator.comparing(Course::id));
 
         } catch (RepositoryException e) {
             LOG.error("Could not retrieve courses from database", e);
             throw new NotFoundException(); // 404 code
         }
+    }
+
+    @POST
+    @Path("/{id}/notes")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public void addNotes(@PathParam("id") String id, String notes) {
+        // test: curl -X POST -H "Content-Type: text/plain" --data "My Course notes ..." http://localhost:8080/courses/0db3d4f0-4268-4e80-a441-58a8ea19b4c0/notes
+        courseRepository.addNotes(id, notes);
     }
 }
