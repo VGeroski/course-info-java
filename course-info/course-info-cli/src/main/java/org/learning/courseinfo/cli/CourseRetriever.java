@@ -1,7 +1,9 @@
 package org.learning.courseinfo.cli;
 
 import org.learning.courseinfo.cli.service.CourseRetrievalService;
+import org.learning.courseinfo.cli.service.CourseStorageService;
 import org.learning.courseinfo.cli.service.PluralsightCourse;
+import org.learning.courseinfo.repository.CourseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,11 +33,16 @@ public class CourseRetriever {
         LOG.info("Retrieving courses for author '{}'", authorId);
 
         CourseRetrievalService courseRetrievalService = new CourseRetrievalService();
+        CourseRepository courseRepository = CourseRepository.openCourseRepository("./courses.db");
+        CourseStorageService courseStorageService = new CourseStorageService(courseRepository);
+
         List<PluralsightCourse> coursesToStore = courseRetrievalService.getCourseFor(authorId)
                 .stream()                              // convert list to stream, and then apply filtering
                 .filter(course -> !course.isRetired()) // filter to present only courses that are not retired
                 .toList();                             // return to List after filtering
         LOG.info("Retrieved the following {} courses {}", coursesToStore.size(), coursesToStore);
+        courseStorageService.storePluralsightCourses(coursesToStore);
+        LOG.info("Courses are successfully stored");
     }
 
 }
